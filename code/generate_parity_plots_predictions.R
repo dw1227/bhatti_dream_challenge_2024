@@ -87,9 +87,9 @@ ano <- ano %>%
 #### extract GA for top performers
 df_test <- read_csv("data/submissions/Test_data_evaluation.csv")  |>  
   mutate(submission_stamp = paste(submitterid, evaluationid, sep = "_")) |> 
-  # group_by(submitterid) |> 
-  # slice_min(Test_rmse,n=1,with_ties = FALSE) |> 
-  # ungroup() |> 
+  group_by(submitterid) |> 
+  slice_min(Test_rmse,n=1,with_ties = FALSE) |> 
+  ungroup() |> 
   mutate(prediction_file = file.path("data/submissions", 
                                 paste0("output_run_", submission_stamp),"predictions.csv")) |> 
   mutate(Submitter  = map_chr(submitterid, extract_username))
@@ -167,10 +167,11 @@ plot_ga_predictions <- function(ga_column,title) {
     labs(x = "Reported GA (weeks)",
          y = "Predicted GA (weeks)",
          title=title) +
-    lims(x = c(16, 44)) +
+    lims(x = c(18, 43),
+         y=c(18,43)) +
     theme_bw() +
-    annotate("text", label = rho, x = 20, y = 40, size = 5, colour = "black") +
-    annotate("text", label = error, x = 20, y = 39, size = 5, colour = "black")
+    annotate("text", label = rho, x = 22, y = 40, size = 5, colour = "black") +
+    annotate("text", label = error, x = 22, y = 39, size = 5, colour = "black")
   
   return(g_sc)
 }
