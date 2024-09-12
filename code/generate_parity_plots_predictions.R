@@ -87,9 +87,9 @@ ano <- ano %>%
 #### extract GA for top performers
 df_test <- read_csv("data/submissions/Test_data_evaluation.csv")  |>  
   mutate(submission_stamp = paste(submitterid, evaluationid, sep = "_")) |> 
-  # group_by(submitterid) |> 
-  # slice_min(Test_rmse,n=1,with_ties = FALSE) |> 
-  # ungroup() |> 
+  group_by(submitterid) |> 
+  slice_min(Test_rmse,n=1,with_ties = FALSE) |> 
+  ungroup() |> 
   mutate(prediction_file = file.path("data/submissions", 
                                 paste0("output_run_", submission_stamp),"predictions.csv")) |> 
   mutate(Submitter  = map_chr(submitterid, extract_username))
@@ -117,20 +117,27 @@ ano<- ano |> left_join(all_predictions,by=c("Sample"="ID"))
 
 # wisdom of crowd
 df <- read_csv("data/submissions/Job-393694313420778661233189284.csv")
-woc_candidates<- df |>   
-  filter(submission_status == "SCORED") |> 
-  filter(!createdBy %in% c("1420476","3379638","3453428","3503156",
-                           "3504542","3505047","3505276")) |> 
-  group_by(submitterid, evaluationid) |> 
-  mutate(submission_datetime = as.POSIXlt(createdOn/1000, origin = "1970-01-01")) |> 
-  slice(which.max(submission_datetime)) |> 
-  group_by(submitterid) |> 
-  slice_min(rmse,n=1,with_ties = FALSE) |> 
-  ungroup() |> 
-  filter(rmse<2) |> 
-  mutate(submission_stamp = paste(submitterid, evaluationid, sep = "_")) |> 
-  pull(submission_stamp)
+# woc_candidates<- df |>   
+#   filter(submission_status == "SCORED") |> 
+#   filter(!createdBy %in% c("1420476","3379638","3453428","3503156",
+#                            "3504542","3505047","3505276")) |> 
+#   group_by(submitterid, evaluationid) |> 
+#   mutate(submission_datetime = as.POSIXlt(createdOn/1000, origin = "1970-01-01")) |> 
+#   slice(which.max(submission_datetime)) |> 
+#   group_by(submitterid) |> 
+#   slice_min(rmse,n=1,with_ties = FALSE) |> 
+#   ungroup() |> 
+#   filter(rmse<2) |> 
+#   mutate(submission_stamp = paste(submitterid, evaluationid, sep = "_")) |> 
+#   pull(submission_stamp)
 
+top_performers <- df_test %>%
+  slice_min(Test_rmse, n = 3) %>%
+  pull(submission_stamp)
+names(top_performers)<- df_test %>%
+  slice_min(Test_rmse, n = 3) %>%
+  pull(Submitter)
+woc_candidates <-  top_performers
 ano$ga_woc<- ano |> 
   select(paste0("ga_",woc_candidates)) |> 
   rowwise() |> 
@@ -160,23 +167,17 @@ plot_ga_predictions <- function(ga_column,title) {
     labs(x = "Reported GA (weeks)",
          y = "Predicted GA (weeks)",
          title=title) +
-    lims(x = c(16, 44)) +
+    lims(x = c(18, 43),
+         y=c(18,43)) +
     theme_bw() +
-    annotate("text", label = rho, x = 20, y = 40, size = 5, colour = "black") +
-    annotate("text", label = error, x = 20, y = 39, size = 5, colour = "black")
+    annotate("text", label = rho, x = 22, y = 40, size = 5, colour = "black") +
+    annotate("text", label = error, x = 22, y = 39, size = 5, colour = "black")
   
   return(g_sc)
 }
 
 
-# Extract the top three performers from df_test
-top_performers <- df_test %>%
-  slice_min(Test_rmse, n = 3) %>%
-  pull(submission_stamp)
-names(top_performers)<- df_test %>%
-  slice_min(Test_rmse, n = 3) %>%
-  pull(Submitter)
-# Add "ga_rpc" to the list of columns to plot
+
 columns_to_plot <- c(RPC="ga_rpc", paste0("ga_", top_performers),"ga_woc")
 names(columns_to_plot)<- c("Robust Placental Clock",names(top_performers),
                            "Wisdom of Crowd")
