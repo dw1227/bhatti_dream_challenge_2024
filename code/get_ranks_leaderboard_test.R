@@ -104,7 +104,7 @@ ft2 <- df_test %>%
 # Generate PowerPoint with the tables
 ppt <- read_pptx() |> 
   add_slide(layout = "Title and Content", master = "Office Theme") %>%
-  ph_with(ft1, location = ph_location_left()) |> 
-  ph_with(ft2, location = ph_location_right())
+  ph_with(ft2, location = ph_location_left()) |> 
+  ph_with(ft1, location = ph_location_right())
 
 print(ppt, target = "results/rankings_leaderboard_test.pptx")

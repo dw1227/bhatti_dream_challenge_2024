@@ -77,10 +77,10 @@ all(rownames(ano)==colnames(beta_norm_BMIQ))
 ano <- ano %>%
   mutate(
     ga_rpc= predictAge(beta_norm_BMIQ, type = "RPC"),
-    Sample= rownames(ano)
+    Sample= rownames(ano),
     # ga_RPC_raw = predictAge(beta_test, type = "RPC")
-    # ga_CPC = predictAge(beta_norm_BMIQ, type = "CPC"),
-    # ga_RRPC = predictAge(beta_norm_BMIQ, type = "RRPC")
+    ga_cpc = predictAge(beta_norm_BMIQ, type = "CPC"),
+    ga_rrpc= predictAge(beta_norm_BMIQ, type = "RRPC")
   )
 
 
@@ -178,8 +178,14 @@ plot_ga_predictions <- function(ga_column,title) {
 
 
 
-columns_to_plot <- c(RPC="ga_rpc", paste0("ga_", top_performers),"ga_woc")
-names(columns_to_plot)<- c("Robust Placental Clock",names(top_performers),
+columns_to_plot <- c(RPC="ga_rpc", 
+                     CPC="ga_cpc",
+                     RRPC="ga_rrpc",
+                     paste0("ga_", top_performers),"ga_woc")
+names(columns_to_plot)<- c("Robust Placental Clock",
+                           "Control Placental Clock",
+                           "Refined Robust Placental Clock",
+                           names(top_performers),
                            "Wisdom of Crowd")
 
 # Use purrr::map to create plots for all GA columns and store them in a list
