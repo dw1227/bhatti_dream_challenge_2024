@@ -8,9 +8,10 @@
 #        data/submissions/Test_data_evaluation.csv
 #        data/submissions/all_predictions.csv
 #        
-# output: predicted vs reported GA for RPC, top performers and WOC solution
+# output: ano with predictions and predicted vs reported GA for RPC, 
+#         top performers and WOC solution
 #         results/Parity_plots.pdf
-
+#         data/processed/ano_all_predictions.csv
 
 
 
@@ -198,3 +199,7 @@ for (plot in plots) {
   print(plot)
 }
 dev.off()
+
+
+
+write_csv(ano,"data/processed/ano_all_predictions.csv")

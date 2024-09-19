@@ -1,0 +1,159 @@
+---
+title: "Epigenetic gestational age acceleration across pregnancy complications"
+author: "G Bhatti"
+date: "9/13/2024"
+output: word_document
+editor_options:
+  chunk_output_type: console
+---
+
+```{r, echo=FALSE, message=FALSE}
+library(tidyverse)
+library(here)
+library(rstatix)
+library(ggpubr)
+
+ano<- read_csv(here("data/processed/ano_all_predictions.csv"))
+ano<- ano |> 
+  filter(!Group %in% "pretermSGA")
+
+test_ranking<- read_csv(here("data/submissions/Test_data_evaluation.csv"))
+               
+```
+
+### Calculate,compare, and plot epigenetic gestational age acceleration 
+
+
+```{r,  echo=FALSE}
+# We'll define a function that  calculates eGA acceleration, statistics 
+# (mean and sd),and performs pairwise comparisons for any prediction column.
+
+calculate_eGA_acceleration <- function(ano_data, prediction_column, ga_column, 
+                                       control_groups = c("Labor", "NoLabor"), 
+                                       comparisons_list = NULL,
+                                       title=NULL) {
+  
+  ano_groups <- ano_data |> 
+    mutate(eGA_acceleration_difference = !!sym(prediction_column) - !!sym(ga_column),
+           Group2 = if_else(Group %in% control_groups, "control", Group)) |> 
+    select(Group2, !!sym(prediction_column), eGA_acceleration_difference)
+  
+  group_stats <- ano_groups |> 
+    group_by(Group2) |> 
+    summarise(
+      mean = mean(eGA_acceleration_difference, na.rm = TRUE),
+      std_dev = sd(eGA_acceleration_difference, na.rm = TRUE),
+      n = n()
+    )
+  
+  pairwise_results <- ano_groups %>%
+    pairwise_t_test(eGA_acceleration_difference ~ Group2, 
+                    p.adjust.method = "fdr", 
+                    comparisons = comparisons_list)
+  
+  combined_results <- pairwise_results |> 
+    left_join(group_stats, by = c("group1" = "Group2")) |> 
+    left_join(group_stats, by = c("group2" = "Group2"), 
+              suffix = c("_group1", "_group2")) |> 
+    select(group1, Mean_eGA_acceleration_group1 = mean_group1, n_group1,
+           group2, Mean_eGA_acceleration_group2 = mean_group2, n_group2,
+           p, p.adj) |> 
+    arrange(p.adj)
+  
+  # Return significant results
+  significant_results <-combined_results %>%
+    filter(p.adj <= 0.1)
+  
+  ano_groups <- ano_groups %>%
+      mutate(Group2 = factor(Group2, levels = c("pretermPE","PTL","PPROM",
+                                                "termPE","termSGA","control")))
+
+ # Calculate y-position for the p-value annotations
+  max_y <- max(ano_groups$eGA_acceleration_difference, na.rm = TRUE)
+  significant_results <- significant_results %>%
+    mutate(y.position = max_y * 1.1)  # Adjust y.position slightly above max value
+  
+  # Create the box plot
+  box_plot <- ggboxplot(ano_groups, x = "Group2", y = "eGA_acceleration_difference", 
+                        color = "Group2", palette = "jco", add = "jitter", 
+                        ylab = "eGA Acceleration Difference", xlab = "Group")+
+    labs(title=title)
+  
+  # Add significance annotations
+  annotated_plot <- box_plot +
+    stat_pvalue_manual(significant_results, label = "p.adj", 
+                       tip.length = 0.01, 
+                       step.increase = 0.1, 
+                       hide.ns = FALSE, 
+                       y.position = "y.position") +
+    theme_pubr() +
+    theme(legend.position = "none") # Remove legend for cleaner plot
+  
+  return(annotated_plot)
+  
+}
+
+```
+
+
+## Define the comparisons
+
+```{r}
+my_comparisons <- list(c("termPE", "control"),
+                       c("termSGA", "control"),
+                       c("PTL", "PPROM"),
+                        c("PTL", "pretermPE"),
+                       c("PTL", "control"),
+                       c("PPROM", "control"),
+                        c("pretermPE", "control"))
+
+```
+
+
+## Compare eGA acceleration Using RPC
+
+```{r,echo=FALSE}
+rpc_results <- calculate_eGA_acceleration(ano, "ga_rpc", "Del_GA_Calc",
+                                          comparisons_list=my_comparisons,
+                                          title="Robust Placental Clock")
+
+```
+
+```{r}
+rpc_results
+
+```
+
+
+## Compare eGA acceleration using the top Solution
+
+```{r,echo=FALSE}
+top_team <- test_ranking %>%
+  group_by(submitterid) %>%
+  slice_min(Test_rmse, n = 1, with_ties = FALSE) %>%
+  ungroup() %>%
+  slice_min(Test_rmse, n = 1, with_ties = FALSE) %>%
+  mutate(stamp = paste("ga", submitterid, evaluationid, sep = "_")) %>%
+  pull(stamp)
+top_team_results <- calculate_eGA_acceleration(ano, top_team,"Del_GA_Calc",
+                                               comparisons_list=my_comparisons,
+                                               title="Top Performer")
+
+```
+
+```{r}
+top_team_results 
+
+```
+
+## Compare eGA Acceleration Using WOC Solution
+```{r,echo=FALSE}
+woc_results <- calculate_eGA_acceleration(ano, "ga_woc", "Del_GA_Calc",
+                                          comparisons_list=my_comparisons,
+                                          title="Wisdom of Crowd") 
+```
+
+```{r}
+woc_results 
+```
+

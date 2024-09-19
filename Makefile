@@ -5,7 +5,8 @@ results/rankings_leaderboard_test.pptx: code/run_r_script.sh \
 	code/run_r_script.sh code/get_ranks_leaderboard_test.R 
 
 
-results/Parity_plots.pdf: code/run_r_script.sh \
+results/Parity_plots.pdf data/processed/ano_all_predictions.csv:\
+              code/run_r_script.sh \
 	            data/submissions/Job-393694313420778661233189284.csv \
 						  data/submissions/Test_data_evaluation.csv\
 						  data/prb/beta_complete_test_bmiq.Rdata\
@@ -28,3 +29,15 @@ results/Bayes_factor_rmse_violin.pdf: code/run_r_script.sh \
 	            results/Bootstrap_RMSE_Results.csv \
 						  code/calculate_bayes_factor_plot_rmse.R                             
 	code/run_r_script.sh code/calculate_bayes_factor_plot_rmse.R
+	
+	
+exploratory/analyze_eGA_acceleration.docx: exploratory/analyze_eGA_acceleration.Rmd\
+	        data/processed/ano_all_predictions.csv\
+			    data/submissions/Test_data_evaluation.csv\
+			    code/render_markdown.R
+	code/run_r_script.sh code/render_markdown.R $<
+
+
+
+
+
