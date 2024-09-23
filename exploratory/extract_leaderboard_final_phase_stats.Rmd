@@ -1,0 +1,128 @@
+---
+title: "Extract summary statistics for leaderboard and final round"
+author: "G Bhatti"
+date: "9/19/2024"
+output: word_document
+editor_options:
+  chunk_output_type: console
+---
+
+```{r, echo=FALSE, message=FALSE}
+library(tidyverse)
+library(here)
+library(rstatix)
+library(ggpubr)
+library(RColorBrewer)
+library(flextable)
+library(officer)
+library(Metrics)
+library(vctrs)
+```
+
+# Calculate the total number of valid submissions during the leaderboard phase
+```{r}
+df <- read_csv(here("data/submissions/Job-393694313420778661233189284.csv"))
+
+# Process submission data and test data
+df_select_submissions <- df |> 
+  filter(submission_status == "SCORED") |> 
+  filter(!createdBy %in% c("1420476","3379638","3453428","3503156", "3504542","3505047","3505276")) 
+
+df_select_submissions |> 
+  group_by(evaluationid) |> 
+  summarise(n_submitters=n_distinct(submitterid),
+    n_submissions=n())
+```
+
+
+## Get the final rankings for the leaderboard phase
+```{r}
+ft1 <- df_select_submissions |> 
+  group_by(submitterid) |> 
+  mutate(submission_datetime = as.POSIXlt(createdOn/1000, origin = "1970-01-01")) |> 
+  slice_min(rmse,n=1,with_ties = FALSE) |> 
+  ungroup() |> 
+  mutate(Leaderboard_Rank = rank(rmse)) |> 
+  select(Rank = Leaderboard_Rank, 
+         Participant = Submitter,  
+         `RMSE (wks)` = rmse,
+         `MAE (wks)`=mae,
+         Correlation=cor,
+         `Sub-challenge`=evaluationid) |> 
+  mutate(Participant=str_replace(Participant,"\\(","\\(@"),
+         `Sub-challenge`=if_else(`Sub-challenge`=="9615595","SC1","SC2")) |> 
+  arrange(Rank) |> 
+  qflextable() |>   
+  align(align = "center", part = "all") |> 
+  colformat_double(j = c("RMSE (wks)","MAE (wks)","Correlation"),digits = 2)  |> 
+  add_header_row(values = c("Ranking during the leaderboard round"), colwidths = c(6)) 
+
+
+
+save_as_docx(ft1, path = here("results/tablex.docx"))
+
+
+```
+
+## How did the Robust Placental clock fare in the leaderboard round?
+
+```{r}
+
+```
+
+
+## Get the final rankings for the final round
+```{r}
+all_predictions<- read_csv(here("data/submissions/all_predictions.csv"))
+ano<- read_csv(here("data/prb/anoall.csv") )
+
+ano<- ano |> select(Sample,Del_GA_Calc) |> 
+  left_join(all_predictions,by=c("Sample"="ID"))
+
+calculate_test_metrics<- function(x){
+  y<-ano$Del_GA_Calc
+  test_cor<- cor(x,y)
+  test_rmse<-rmse(x,y)
+  test_mae<-mae(x,y)
+  return(c(test_cor=test_cor,test_rmse=test_rmse,
+           test_mae=test_mae))
+}
+ga_cols<- ano |> select(starts_with("ga_"))
+
+test_metrics<- ga_cols |> 
+  map_dfr(~calculate_test_metrics(.),.id="column_name") |> 
+  separate(col=column_name,into = c("GA","submitterid","evaluationid"),sep = "_") |> 
+  mutate(submission_stamp = paste(submitterid, evaluationid, sep = "_")) |> 
+  select(-GA,-submitterid,-evaluationid)
+ 
+df_test <- read_csv(here("data/submissions/Test_data_evaluation.csv") )
+
+ft2 <- df_test |>  
+  mutate(submission_stamp = paste(submitterid, evaluationid, sep = "_")) |>
+  left_join(test_metrics,by=c("submission_stamp")) |> 
+  group_by(submitterid) |> 
+  slice_min(Test_rmse,n=1,with_ties = FALSE) |> 
+  ungroup() |> 
+  mutate(Leaderboard_Rank = rank(test_rmse)) |> 
+  left_join(df_select_submissions |> 
+              select(submitterid,Submitter) |> 
+              filter(!duplicated(submitterid)),
+            by="submitterid") |> 
+  select(Rank = Leaderboard_Rank, 
+         Participant = Submitter,  
+         `RMSE (wks)` = test_rmse,
+         `MAE (wks)`=test_mae,
+         Correlation=test_cor,
+         `Sub-challenge`=evaluationid) |> 
+  mutate(Participant=str_replace(Participant,"\\(","\\(@"),
+         `Sub-challenge`=if_else(`Sub-challenge`=="9615595","SC1","SC2")) |> 
+  arrange(Rank) |> 
+  qflextable() |>   
+  align(align = "center", part = "all") |> 
+  colformat_double(j = c("RMSE (wks)","MAE (wks)","Correlation"),digits = 2)  |> 
+  add_header_row(values = c("Ranking after the final evaluation"), colwidths = c(6)) 
+  
+save_as_docx(ft2, path = here("results/tabley.docx"))
+```
+
+

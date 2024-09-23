@@ -22,7 +22,7 @@ test_ranking<- read_csv(here("data/submissions/Test_data_evaluation.csv"))
 ```
 
 ### Calculate,compare, and plot epigenetic gestational age acceleration 
-```{r}
+```{r, echo=F}
 
 analyze_eGA_acceleration <- function(data, ega_column, chronological_column, groups, title=NULL) {
   data <- data |> 
@@ -110,24 +110,35 @@ top_teams <- test_ranking |>
 
 top_team_results_1 <- analyze_eGA_acceleration(ano, top_teams[1],"Del_GA_Calc",
                                                groups=groups,
-                                               title="Top Performer 1")
+                                               title="Top Performer #1")
 top_team_results_1
 
 top_team_results_2 <- analyze_eGA_acceleration(ano, top_teams[2],"Del_GA_Calc",
                                                groups=groups,
-                                               title="Top Performer 2")
+                                               title="Top Performer #2")
 top_team_results_2
 
 top_team_results_3 <- analyze_eGA_acceleration(ano, top_teams[3],"Del_GA_Calc",
                                                groups=groups,
-                                               title="Top Performer 3")
+                                               title="Top Performer #3")
 top_team_results_3
 
 woc_results <- analyze_eGA_acceleration(ano, "ga_woc","Del_GA_Calc",
                                                groups=groups,
-                                               title="Top Performer")
+                                               title="Wisdom of Crowd")
 woc_results
 ```
 
 
+```{r}
+pdf(here("results/eGA_acceleration_clocks.pdf"),width = 8)
+rpc_results
+cpc_results
+rrpc_results
+top_team_results_1
+top_team_results_2
+top_team_results_3
+woc_results
+dev.off()
+```
 
