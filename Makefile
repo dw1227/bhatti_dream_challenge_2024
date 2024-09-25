@@ -54,3 +54,13 @@ results/tablex.docx results/tabley.docx: exploratory/extract_leaderboard_final_p
 
 
 
+results/pca_sc1_leaderboard_test.pdf:  data/dream_challenge/Leaderboard_beta_subchallenge1.csv\
+          data/dream_challenge/Beta_raw_subchallenge1.csv\
+          data/prb/beta_raw.Rdata\
+          data/dream_challenge/Sample_annotation_metadata.csv exploratory\
+	        data/submissions/Job-393694313420778661233189284.csv\
+	        data/submissions/all_predictions.csv\
+			    data/prb/anoall.csv\
+			    code/run_r_script.sh\
+			    code/plot_pca_challenge_data.R
+	code/run_r_script.sh code/plot_pca_challenge_data.R
