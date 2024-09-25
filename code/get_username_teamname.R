@@ -3,10 +3,11 @@
 # author: Gaurav Bhatti
 #
 # input: data/submissions/Job-393694313420778661233189284.csv
+#        data/submissions/Test_data_evaluation.csv
 #        
-#        
-# output: the same file with full user/team names
+# output: the same files with full user/team names
 #         data/submissions/Job-393694313420778661233189284.csv
+#         data/submissions/Test_data_evaluation.csv
 
 
 
@@ -58,3 +59,8 @@ extract_username <- function(id) {
 read_csv("data/submissions/Job-393694313420778661233189284.csv") |> 
   mutate(Submitter  = map_chr(submitterid, extract_username)) |> 
   write_csv("data/submissions/Job-393694313420778661233189284.csv")
+
+
+read_csv("data/submissions/Test_data_evaluation.csv")  |>  
+  mutate(Submitter  = map_chr(submitterid, extract_username)) |> 
+  write_csv("data/submissions/Test_data_evaluation.csv")
