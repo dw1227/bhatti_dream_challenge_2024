@@ -38,13 +38,13 @@ results/Bayes_factor_rmse_violin.pdf: code/run_r_script.sh \
 						  code/calculate_bayes_factor_plot_rmse.R                             
 	code/run_r_script.sh code/calculate_bayes_factor_plot_rmse.R
 	
-	
-exploratory/analyze_eGA_acceleration.docx: exploratory/analyze_eGA_acceleration.Rmd\
-	        data/processed/ano_all_predictions.csv\
+
+results/eGA_acceleration_table.csv results/eGA_acceleration_clocks.pdf: \
+	            data/processed/ano_all_predictions.csv\
 			    data/submissions/Test_data_evaluation.csv\
 			    code/run_r_script.sh\
-			    code/render_markdown.R
-	code/run_r_script.sh code/render_markdown.R $<
+			    code/plot_ega_acceleration.R
+	code/run_r_script.sh code/plot_ega_acceleration.R
 
 
 results/tablex.docx results/tabley.docx: exploratory/extract_leaderboard_final_phase_stats.Rmd\
