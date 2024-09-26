@@ -28,7 +28,7 @@ beta_norm_BMIQ<- beta_norm_BMIQ[,rownames(ano)]
 
 
 
-
+## Lee et al 2019 clocks
 ano <- ano %>%
   mutate(
     ga_rpc= predictAge(beta_norm_BMIQ, type = "RPC"),
@@ -36,6 +36,19 @@ ano <- ano %>%
     ga_cpc = predictAge(beta_norm_BMIQ, type = "CPC"),
     ga_rrpc= predictAge(beta_norm_BMIQ, type = "RRPC")
   )
+
+## Mayne et al 2017 clock
+# mayne_clock_coef<- read_csv("data/clocks/mayne_clock_coefficients.csv")
+# probe_coef<- mayne_clock_coef |> 
+#   filter(Probe %in%  rownames(beta_norm_BMIQ))
+# beta_matrix<- beta_norm_BMIQ [probe_coef$Probe,]
+# 
+# ano$ga_mayne<-  colSums(beta_matrix*probe_coef$Coefficient) + 
+#   (mayne_clock_coef |> filter(Probe=="(Intercept)") |> pull(Coefficient))
+# 
+# rmse <- Metrics::rmse(ano[["Del_GA_Calc"]], ano[["ga_mayne"]])
+
+
 
 
 #### extract GA for top performers
@@ -84,6 +97,5 @@ ano$ga_woc<- ano |>
 
 write_csv(ano,"data/processed/ano_all_predictions.csv")
  
-
 
 

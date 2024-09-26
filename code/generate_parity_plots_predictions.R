@@ -95,11 +95,14 @@ plot_ga_predictions <- function(ga_column,title) {
 
 
 
-columns_to_plot <- c(RPC="ga_rpc", 
+columns_to_plot <- c(Mayne="ga_mayne",
+                    RPC="ga_rpc", 
                      CPC="ga_cpc",
                      RRPC="ga_rrpc",
                      paste0("ga_", top_performers),"ga_woc")
-names(columns_to_plot)<- c("Robust Placental Clock",
+
+names(columns_to_plot)<- c("Mayne et al. 2017",
+                           "Robust Placental Clock",
                            "Control Placental Clock",
                            "Refined Robust Placental Clock",
                            names(top_performers),

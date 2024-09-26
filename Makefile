@@ -57,6 +57,11 @@ results/tablex.docx results/tabley.docx: exploratory/extract_leaderboard_final_p
 	code/run_r_script.sh code/render_markdown.R $<
 
 
+results/plots_mayne.pdf: data/dream_challenge/normalized_450k_combined.Rdata\
+	        data/clocks/mayne_clock_coefficients.csv\
+	        code/run_r_script.sh\
+			    code/plot_parity_eGA_acceleration_mayne_450k.R
+	code/run_r_script.sh code/plot_parity_eGA_acceleration_mayne_450k.R 
 
 results/pca_sc1_leaderboard_test.pdf:  data/dream_challenge/Leaderboard_beta_subchallenge1.csv\
           data/dream_challenge/Beta_raw_subchallenge1.csv\
