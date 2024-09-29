@@ -6,11 +6,10 @@
 #        data/prb/anoall.csv
 #        data/submissions/Job-393694313420778661233189284.csv
 #        data/submissions/Test_data_evaluation.csv
+#        data/processed/autogluonpredictions.csv
 #        
 # output: ano with predictions                                                      
 #         data/processed/ano_all_predictions.csv
-
-
 
 rm(list=ls())
 library(planet)
@@ -36,6 +35,16 @@ ano <- ano %>%
     ga_cpc = predictAge(beta_norm_BMIQ, type = "CPC"),
     ga_rrpc= predictAge(beta_norm_BMIQ, type = "RRPC")
   )
+
+# autogluon
+
+ano<- read_csv("data/processed/autogluon_predictions.csv") |> 
+  rename(ga_automl=GA,
+         Sample=Sample_ID) |> 
+  right_join(ano,by=c("Sample"))
+  
+  
+
 
 ## Mayne et al 2017 clock
 # mayne_clock_coef<- read_csv("data/clocks/mayne_clock_coefficients.csv")

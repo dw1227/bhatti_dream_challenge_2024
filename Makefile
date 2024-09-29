@@ -9,6 +9,7 @@ results/rankings_leaderboard_test.pptx: code/run_r_script.sh \
 
 
 data/processed/ano_all_predictions.csv: data/prb/beta_complete_test_bmiq.Rdata\
+              data/processed/autogluon_predictions.csv\
               data/prb/anoall.csv\
               data/submissions/Job-393694313420778661233189284.csv\
               data/submissions/Test_data_evaluation.csv\
@@ -82,3 +83,8 @@ results/plot_association_ega_acceleration_environmental_exposures.pdf: \
 			    code/association_ega_acceleration_envrionmental_exposures.R
 	code/run_r_script.sh code/association_ega_acceleration_envrionmental_exposures.R 
 
+data/processed/autogluon_predictions.csv: \
+	        data/prb/beta_raw.Rdata\
+	        code/run_python_script.sh\
+			    code/autogluon_predictions.py
+	code/run_python_script.sh code/autogluon_predictions.py

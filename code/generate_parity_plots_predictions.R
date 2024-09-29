@@ -95,18 +95,17 @@ plot_ga_predictions <- function(ga_column,title) {
 
 
 
-columns_to_plot <- c(Mayne="ga_mayne",
-                    RPC="ga_rpc", 
+columns_to_plot <- c(RPC="ga_rpc", 
                      CPC="ga_cpc",
                      RRPC="ga_rrpc",
-                     paste0("ga_", top_performers),"ga_woc")
+                     paste0("ga_", top_performers),"ga_woc","ga_automl")
 
-names(columns_to_plot)<- c("Mayne et al. 2017",
-                           "Robust Placental Clock",
+names(columns_to_plot)<- c("Robust Placental Clock",
                            "Control Placental Clock",
                            "Refined Robust Placental Clock",
                            names(top_performers),
-                           "Wisdom of Crowd")
+                           "Wisdom of Crowd",
+                           "Autogluon")
 
 # Use purrr::map to create plots for all GA columns and store them in a list
 plots <- map2(columns_to_plot, 
