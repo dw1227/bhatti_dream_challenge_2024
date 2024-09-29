@@ -73,3 +73,12 @@ results/pca_sc1_leaderboard_test.pdf:  data/dream_challenge/Leaderboard_beta_sub
 			    code/run_r_script.sh\
 			    code/plot_pca_challenge_data.R
 	code/run_r_script.sh code/plot_pca_challenge_data.R
+	
+results/plot_association_ega_acceleration_environmental_exposures.pdf: \
+          data/processed/ano_all_predictions.csv\
+	        data/prb/sample_metadata.csv\
+	        data/submissions/Test_data_evaluation.csv\
+	        code/run_r_script.sh\
+			    code/association_ega_acceleration_envrionmental_exposures.R
+	code/run_r_script.sh code/association_ega_acceleration_envrionmental_exposures.R 
+
