@@ -4,13 +4,13 @@ import numpy as np
 import seaborn as sns
 from autogluon.tabular import TabularPredictor
 
-df_ano= pyreadr.read_r("data/prb/beta_raw.Rdata")
+df_ano= pyreadr.read_r("data/prb/beta_complete_test_bmiq.Rdata")
 predictor =\
-TabularPredictor.load("data/grid_cpu_1/AutogluonModels/ag-20240926_021756")
+TabularPredictor.load("data/redhat_2/AutogluonModels/ag-20241006_031312")
 
 
 
-test_df =df_ano['beta_test']
+test_df =df_ano['beta_norm_BMIQ']
 test_df=test_df.transpose()
 
 predictions = predictor.predict(test_df,as_pandas=True)
