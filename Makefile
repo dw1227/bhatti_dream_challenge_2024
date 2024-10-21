@@ -6,10 +6,25 @@ results/rankings_leaderboard_test.pptx: code/run_r_script.sh \
 	code/run_r_script.sh code/get_ranks_leaderboard_test.R 
 
 
+data/processed/autogluon_predictions_450k.csv: \
+			data/prb/beta_complete_test_bmiq.Rdata\
+			data/automl/redhat_2/AutogluonModels/ag-20241006_031312/ \
+			code/run_python_script.sh\
+			code/autogluon_predictions.py
+	code/run_python_script.sh code/autogluon_predictions.py data/automl/redhat_2/AutogluonModels/ag-20241006_031312/ $@
+	        
+data/processed/autogluon_predictions_850k.csv: \
+			data/prb/beta_complete_test_bmiq.Rdata \
+			data/automl/cpugpu_850_360/ag-20241016_022405/ \
+			code/run_python_script.sh\
+			code/autogluon_predictions.py
+	code/run_python_script.sh code/autogluon_predictions.py data/automl/cpugpu_850_360/ag-20241016_022405/ $@
+
 
 
 data/processed/ano_all_predictions.csv: data/prb/beta_complete_test_bmiq.Rdata\
-              data/processed/autogluon_predictions.csv\
+              data/processed/autogluon_predictions_450k.csv\
+			  data/processed/autogluon_predictions_850k.csv\
               data/prb/anoall.csv\
               data/submissions/Job-393694313420778661233189284.csv\
               data/submissions/Test_data_evaluation.csv\
@@ -83,8 +98,4 @@ results/plot_association_ega_acceleration_environmental_exposures.pdf: \
 			    code/association_ega_acceleration_envrionmental_exposures.R
 	code/run_r_script.sh code/association_ega_acceleration_envrionmental_exposures.R 
 
-data/processed/autogluon_predictions.csv: \
-	        data/prb/beta_raw.Rdata\
-	        code/run_python_script.sh\
-			    code/autogluon_predictions.py
-	code/run_python_script.sh code/autogluon_predictions.py
+

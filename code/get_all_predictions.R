@@ -6,7 +6,8 @@
 #        data/prb/anoall.csv
 #        data/submissions/Job-393694313420778661233189284.csv
 #        data/submissions/Test_data_evaluation.csv
-#        data/processed/autogluonpredictions.csv
+#        data/processed/autogluon_predictions_450k.csv
+#        data/processed/autogluon_predictions_850k.csv
 #        
 # output: ano with predictions                                                      
 #         data/processed/ano_all_predictions.csv
@@ -36,12 +37,19 @@ ano <- ano %>%
     ga_rrpc= predictAge(beta_norm_BMIQ, type = "RRPC")
   )
 
-# autogluon
+# autogluon 
 
-ano<- read_csv("data/processed/autogluon_predictions.csv") |> 
-  rename(ga_automl=GA,
+ano<- read_csv("data/processed/autogluon_predictions_450k.csv") |> 
+  rename(ga_automl_450k=GA,
+         Sample=Sample_ID) |> 
+  right_join(ano,by=c("Sample")) 
+
+
+ano<- read_csv("data/processed/autogluon_predictions_850k.csv") |> 
+  rename(ga_automl_850k=GA,
          Sample=Sample_ID) |> 
   right_join(ano,by=c("Sample"))
+  
   
   
 

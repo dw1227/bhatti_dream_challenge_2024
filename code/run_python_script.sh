@@ -12,5 +12,5 @@ if [[ $(module list 2>&1 | grep -q "python/3.11"; echo $?) -ne 0 ]]
              module load python/3.11 
          fi
 
-# Run the provided R script
+# Run the provided python script
 python "$1" "${@:2}"

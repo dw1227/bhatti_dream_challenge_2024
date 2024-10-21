@@ -5,7 +5,9 @@
 # input: data/processed/ano_all_predictions.csv        
 #        data/submissions/Job-393694313420778661233189284.csv
 #        data/submissions/Test_data_evaluation.csv
-#        data/submissions/all_predictions.csv
+#        data/submissions/all_predictions.csv      
+#        
+
 #        
 # output: ano with predictions and predicted vs reported GA for RPC, 
 #         top performers and WOC solution
@@ -98,14 +100,18 @@ plot_ga_predictions <- function(ga_column,title) {
 columns_to_plot <- c(RPC="ga_rpc", 
                      CPC="ga_cpc",
                      RRPC="ga_rrpc",
-                     paste0("ga_", top_performers),"ga_woc","ga_automl")
+                     paste0("ga_", top_performers),
+                     "ga_woc",
+                     "ga_automl_450k",
+                     "ga_automl_850k")
 
 names(columns_to_plot)<- c("Robust Placental Clock",
                            "Control Placental Clock",
                            "Refined Robust Placental Clock",
                            names(top_performers),
                            "Wisdom of Crowd",
-                           "Autogluon")
+                           "Autogluon (450K)",
+                           "Autogluon (850K)")
 
 # Use purrr::map to create plots for all GA columns and store them in a list
 plots <- map2(columns_to_plot, 
