@@ -89,6 +89,13 @@ results/pca_sc1_leaderboard_test.pdf:  data/dream_challenge/Leaderboard_beta_sub
 			    code/run_r_script.sh\
 			    code/plot_pca_challenge_data.R
 	code/run_r_script.sh code/plot_pca_challenge_data.R
+
+results/heatmap_sc2.pdf:  data/dream_challenge/Beta_normalized_subchallenge2.csv \
+        data/dream_challenge/Sample_annotation_metadata.csv \
+        data/dream_challenge/Probe_array.csv \
+			  code/run_r_script.sh\
+			  code/plot_heatmap_challenge_data.R
+	code/run_r_script.sh code/plot_heatmap_challenge_data.R
 	
 results/plot_association_ega_acceleration_environmental_exposures.pdf: \
           data/processed/ano_all_predictions.csv\
