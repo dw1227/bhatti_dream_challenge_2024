@@ -103,7 +103,9 @@ columns_to_plot <- c(RPC="ga_rpc",
                      paste0("ga_", top_performers),
                      "ga_woc",
                      "ga_automl_450k",
-                     "ga_automl_850k")
+                     "ga_automl_850k",
+                     "ga_automl_850k_2",
+                     "wsu_450k")
 
 names(columns_to_plot)<- c("Robust Placental Clock",
                            "Control Placental Clock",
@@ -111,7 +113,9 @@ names(columns_to_plot)<- c("Robust Placental Clock",
                            names(top_performers),
                            "Wisdom of Crowd",
                            "Autogluon (450K)",
-                           "Autogluon (850K)")
+                           "Autogluon (850K)",
+                           "Autogluon (450K-2)",
+                           "WSU (450K)")
 
 # Use purrr::map to create plots for all GA columns and store them in a list
 plots <- map2(columns_to_plot, 

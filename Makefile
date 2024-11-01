@@ -15,10 +15,29 @@ data/processed/autogluon_predictions_450k.csv: \
 	        
 data/processed/autogluon_predictions_850k.csv: \
 			data/prb/beta_complete_test_bmiq.Rdata \
-			data/automl/cpugpu_850_360/ag-20241016_022405/ \
+			data/automl/autog850_360_cpu/ag-20241021_160023/ \
 			code/run_python_script.sh\
 			code/autogluon_predictions.py
-	code/run_python_script.sh code/autogluon_predictions.py data/automl/cpugpu_850_360/ag-20241016_022405/ $@
+	code/run_python_script.sh code/autogluon_predictions.py data/automl/autog850_360_cpu/ag-20241021_160023/ $@
+
+	        
+data/processed/autogluon_predictions_850k_2.csv: \
+			data/prb/beta_complete_test_bmiq.Rdata \
+			data/automl/autog360_norm_4days/ag-20241025_220439/ \
+			code/run_python_script.sh\
+			code/autogluon_predictions.py
+	code/run_python_script.sh code/autogluon_predictions.py data/automl/autog360_norm_4days/ag-20241025_220439/ $@
+	
+	
+	        
+data/clocks/wsu_pl_clock_450k.Rdata: \
+			data/dream_challenge/beta_public_normalized_sc1.Rdata \
+			code/wsu_placenta_clock_450k.R \
+			code/submit_wsu_placenta_clock_training.sh
+	sbatch code/submit_wsu_placenta_clock_training.sh
+	
+	
+
 
 
 

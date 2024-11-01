@@ -15,7 +15,7 @@
 rm(list=ls())
 library(planet)
 library(tidyverse)
-
+library(glmnet)
 
 ## load test data and annotation
 load("data/prb/beta_complete_test_bmiq.Rdata")
@@ -37,8 +37,17 @@ ano <- ano %>%
     ga_rrpc= predictAge(beta_norm_BMIQ, type = "RRPC")
   )
 
-# autogluon 
 
+# Wayne state 450k clock
+load("data/clocks/wsu_pl_clock_450k_bias_alpha.Rdata")
+
+
+X_test<- t(beta_norm_BMIQ[rownames(coefficients(best_model))[-1],rownames(ano)])
+ano$wsu_450k= predict(best_model,newx = X_test)[rownames(ano),1]
+
+rm(X_test,best_model)
+
+# autogluon 
 ano<- read_csv("data/processed/autogluon_predictions_450k.csv") |> 
   rename(ga_automl_450k=GA,
          Sample=Sample_ID) |> 
@@ -51,7 +60,11 @@ ano<- read_csv("data/processed/autogluon_predictions_850k.csv") |>
   right_join(ano,by=c("Sample"))
   
   
-  
+ano<- read_csv("data/processed/autogluon_predictions_850k_2.csv") |> 
+  rename(ga_automl_850k_2=GA,
+         Sample=Sample_ID) |> 
+  right_join(ano,by=c("Sample"))
+
 
 
 ## Mayne et al 2017 clock

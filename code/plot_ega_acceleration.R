@@ -17,40 +17,40 @@ library(ggpubr)
 ano<- read_csv(here("data/processed/ano_all_predictions.csv"))
 
 
-test_results <- ano |> 
-  mutate(eGA_acceleration = ga_rpc - Del_GA_Calc) |> 
-  mutate(Group=if_else(Del_GA_Calc<37,"PTB","TB"),
-         Clock="RPC") |> 
-  group_by(Group) |> 
-  summarise(Clock=unique(Clock),
-            t_value = t.test(eGA_acceleration, mu = 0, alternative = "two.sided")$statistic,
-            p_value = t.test(eGA_acceleration, mu = 0, alternative = "two.sided")$p.value,
-            mean_eGA_acceleration = round(mean(eGA_acceleration, na.rm = TRUE),2),
-            sd_eGA_acceleration = sd(eGA_acceleration, na.rm = TRUE),
-            n = n()) |> 
-  bind_rows(ano |> 
-              mutate(eGA_acceleration = ga_3505704_9615595 - Del_GA_Calc) |> 
-              mutate(Group=if_else(Del_GA_Calc<37,"PTB","TB"),
-                     Clock="Top_team") |> 
-              group_by(Group) |> 
-              summarise(Clock=unique(Clock),
-                        t_value = t.test(eGA_acceleration, mu = 0, alternative = "two.sided")$statistic,
-                        p_value = t.test(eGA_acceleration, mu = 0, alternative = "two.sided")$p.value,
-                        mean_eGA_acceleration = round(mean(eGA_acceleration, na.rm = TRUE),2),
-                        sd_eGA_acceleration = sd(eGA_acceleration, na.rm = TRUE),
-                        n = n())) |> 
-  bind_rows(ano |> 
-              mutate(eGA_acceleration = ga_woc - Del_GA_Calc) |> 
-              mutate(Group=if_else(Del_GA_Calc<37,"PTB","TB"),
-                     Clock="WOC") |> 
-              group_by(Group) |> 
-              summarise(Clock=unique(Clock),
-                        t_value = t.test(eGA_acceleration, mu = 0, alternative = "two.sided")$statistic,
-                        p_value = t.test(eGA_acceleration, mu = 0, alternative = "two.sided")$p.value,
-                        mean_eGA_acceleration = round(mean(eGA_acceleration, na.rm = TRUE),2),
-                        sd_eGA_acceleration = sd(eGA_acceleration, na.rm = TRUE),
-                        n = n())) |> 
-  write_csv(file="results/eGA_acceleration_table.csv")
+# test_results <- ano |> 
+#   mutate(eGA_acceleration = ga_rpc - Del_GA_Calc) |> 
+#   mutate(Group=if_else(Del_GA_Calc<37,"PTB","TB"),
+#          Clock="RPC") |> 
+#   group_by(Group) |> 
+#   summarise(Clock=unique(Clock),
+#             t_value = t.test(eGA_acceleration, mu = 0, alternative = "two.sided")$statistic,
+#             p_value = t.test(eGA_acceleration, mu = 0, alternative = "two.sided")$p.value,
+#             mean_eGA_acceleration = round(mean(eGA_acceleration, na.rm = TRUE),2),
+#             sd_eGA_acceleration = sd(eGA_acceleration, na.rm = TRUE),
+#             n = n()) |> 
+#   bind_rows(ano |> 
+#               mutate(eGA_acceleration = ga_3505704_9615595 - Del_GA_Calc) |> 
+#               mutate(Group=if_else(Del_GA_Calc<37,"PTB","TB"),
+#                      Clock="Top_team") |> 
+#               group_by(Group) |> 
+#               summarise(Clock=unique(Clock),
+#                         t_value = t.test(eGA_acceleration, mu = 0, alternative = "two.sided")$statistic,
+#                         p_value = t.test(eGA_acceleration, mu = 0, alternative = "two.sided")$p.value,
+#                         mean_eGA_acceleration = round(mean(eGA_acceleration, na.rm = TRUE),2),
+#                         sd_eGA_acceleration = sd(eGA_acceleration, na.rm = TRUE),
+#                         n = n())) |> 
+#   bind_rows(ano |> 
+#               mutate(eGA_acceleration = ga_woc - Del_GA_Calc) |> 
+#               mutate(Group=if_else(Del_GA_Calc<37,"PTB","TB"),
+#                      Clock="WOC") |> 
+#               group_by(Group) |> 
+#               summarise(Clock=unique(Clock),
+#                         t_value = t.test(eGA_acceleration, mu = 0, alternative = "two.sided")$statistic,
+#                         p_value = t.test(eGA_acceleration, mu = 0, alternative = "two.sided")$p.value,
+#                         mean_eGA_acceleration = round(mean(eGA_acceleration, na.rm = TRUE),2),
+#                         sd_eGA_acceleration = sd(eGA_acceleration, na.rm = TRUE),
+#                         n = n())) |> 
+#   write_csv(file="results/eGA_acceleration_table.csv")
 
   
 
@@ -154,6 +154,10 @@ top_team_results_3 <- analyze_eGA_acceleration(ano, top_teams[3],"Del_GA_Calc",
 woc_results <- analyze_eGA_acceleration(ano, "ga_woc","Del_GA_Calc",
                                         title="Wisdom of Crowd")
 
+wsu_450_results <- analyze_eGA_acceleration(ano, "wsu_450k","Del_GA_Calc",
+                                        title="WSU (450K)")
+
+
 pdf(here("results/eGA_acceleration_clocks.pdf"),width = 8)
 rpc_results
 cpc_results
@@ -162,6 +166,7 @@ top_team_results_1
 top_team_results_2
 top_team_results_3
 woc_results
+wsu_450_results
 dev.off()
 
 
