@@ -39,11 +39,11 @@ ano <- ano %>%
 
 
 # Wayne state 450k clock
-load("data/clocks/wsu_pl_clock_450k_bias_alpha.Rdata")
-
-
+load("data/clocks/wsu_pl_clock_450k.Rdata")
 X_test<- t(beta_norm_BMIQ[rownames(coefficients(best_model))[-1],rownames(ano)])
 ano$wsu_450k= predict(best_model,newx = X_test)[rownames(ano),1]
+
+
 
 rm(X_test,best_model)
 
