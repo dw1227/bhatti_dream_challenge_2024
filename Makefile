@@ -38,9 +38,6 @@ data/clocks/wsu_pl_clock_450k.Rdata: \
 	
 	
 
-
-
-
 data/processed/ano_all_predictions.csv: data/prb/beta_complete_test_bmiq.Rdata\
               data/processed/autogluon_predictions_450k.csv\
 			  data/processed/autogluon_predictions_850k.csv\
@@ -50,6 +47,18 @@ data/processed/ano_all_predictions.csv: data/prb/beta_complete_test_bmiq.Rdata\
 						  code/run_r_script.sh\
 						  code/get_all_predictions.R                             
 	code/run_r_script.sh code/get_all_predictions.R
+	
+	
+
+	
+results/demographics_test.csv results/Test_training_datasets_GA_distribution.pdf: \
+              data/prb/sample_metadata.csv\
+						  data/prb/anoall.csv\
+						  code/run_r_script.sh\
+						  code/get_demographics_table_ga_dist.R                            
+	code/run_r_script.sh code/get_demographics_table_ga_dist.R	
+	
+	
 	
 results/parity_plots.pdf: data/submissions/Test_data_evaluation.csv\
 						  data/processed/ano_all_predictions.csv\
