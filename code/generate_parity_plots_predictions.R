@@ -111,11 +111,11 @@ names(columns_to_plot)<- c("Robust Placental Clock",
                            "Control Placental Clock",
                            "Refined Robust Placental Clock",
                            names(top_performers),
-                           "Wisdom of Crowd",
+                           "Wisdom of Crowds",
                            "Autogluon (450K)",
                            "Autogluon (850K)",
                            "Autogluon (450K-2)",
-                           "WSU (450K)")
+                           "Wayne state placental clock")
 
 # Use purrr::map to create plots for all GA columns and store them in a list
 plots <- map2(columns_to_plot, 
