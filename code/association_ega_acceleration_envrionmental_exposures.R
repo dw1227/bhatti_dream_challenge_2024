@@ -19,7 +19,8 @@ library(cowplot)
 ano<- read_csv(here("data/processed/ano_all_predictions.csv"))
 
 metadata<- read_csv(here("data/prb/sample_metadata.csv")) |> 
-  select("EN_Main_Index","EN_Smoking","EN_smokingtxt","EN_Drugs","EN_Drug_txt")
+  select("EN_Main_Index","EN_Smoking","EN_smokingtxt","EN_Drugs","EN_Drug_txt",
+         "EN_Pre_Preg_Wtkg","DL_Del_WeightKG")
 
 ano<- read_csv("data/processed/ano_all_predictions.csv")
 
@@ -33,7 +34,10 @@ ano<- ano |>
          bmi=(703*weight/(height)^2),
          obesity=factor(if_else(bmi>=30,1,0,NA),levels = c("0","1")),
          advanced_maternal_age=factor(if_else(Age>=35,1,0,NA),
-                                      levels = c("0","1")))
+                                      levels = c("0","1")),
+         sga=factor(if_else(Percentile<10,1,0),
+                    levels = c("0","1")),
+         weight_gain=DL_Del_WeightKG- EN_Pre_Preg_Wtkg)
 
 
 test_ranking<- read_csv(here("data/submissions/Test_data_evaluation.csv"))
@@ -56,7 +60,9 @@ data=ano
 # Calculate EGA acceleration: Epi GA - Chronological GA
 data[[paste(clock, "acceleration", sep = "_")]] <- data[[clock]] - data$Del_GA_Calc
 # Model formula
-formula <- as.formula(paste0(clock, "_acceleration ~ smoking + drugs + fetal_sex + advanced_maternal_age + obesity"))
+formula <- as.formula(paste0(clock, "_acceleration ~ smoking + drugs + fetal_sex + 
+                             advanced_maternal_age + obesity + sga+ 
+                             Del_GA_Calc"))
 # Fit linear model
 model <- lm(formula, data = data)
 summary_df <- tidy(model,conf.int=TRUE)
@@ -68,13 +74,11 @@ return(summary_df)
 
 
 clocks <- c("ga_rpc", "ga_cpc", "ga_rrpc",top_teams,"wsu_450k" )  
-titles<- c("RPC","CPC","RRPC","Team 1","Team 2","WSPC")
+titles<- c("RPC","CPC","RRPC","Dream\nTeam 1","Dream\nTeam 2","WSPC")
 names(titles)<-clocks
 # Use map_df to iterate over clocks and bind the results into one dataframe
 model_results_df <- map_df(clocks, fit_ega_model) |> 
-  mutate(title=titles[clock])
-
-
+  mutate(title=titles[clock]) 
 
 # Define a mapping of original terms to shortened terms
 short_names <- c(
@@ -82,21 +86,35 @@ short_names <- c(
   fetal_sex1 = "Fetal sex \n(female vs male)",
   smoking1 = "Smoking",
   obesity1 = "Obesity",
-  drugs1 = "Drug use"
+  drugs1 = "Drug use",
+  sga1="SGA neonate",
+  weight_gain="weight_gain",
+  Del_GA_Calc="GA"
 )
 
 # Assuming model_results_df is your dataframe
 model_results_df <- model_results_df |> 
   mutate(short_term = if_else(term %in%  names(short_names), 
                               short_names[term], term),
-         short_term= factor(short_term,levels = c("Advanced \nmaternal age","Obesity",
-                                      "Smoking","Drug use","Fetal sex \n(female vs male)"))) 
+         short_term= factor(short_term,levels = c("Fetal sex \n(female vs male)","SGA neonate",
+                                                  "Smoking","Drug use",
+                                                  "Advanced \nmaternal age",
+                                                 "Obesity","GA"))) 
+
+model_results_df |>   
+  filter(term != "(Intercept)") |> 
+  select(Model=title,Variable=short_term,Beta=estimate,conf.low,conf.high,p.value) |> 
+  mutate(q=p.adjust(p.value,"fdr")) |> 
+  mutate(across(where(is.numeric), round, 3)) |> 
+  write_csv("results/Coef_eGA_acceleration_maternal_fetal_factors.csv")
 
 
 
 pdf("results/plot_association_ega_acceleration_environmental_exposures.pdf",width=9)
 model_results_df %>%
   filter(term != "(Intercept)") |> 
+  filter(short_term != "GA") |> 
+  mutate(title=factor(title,levels=c("Dream\nTeam 1","Dream\nTeam 2","WSPC","RPC","CPC","RRPC"))) |> 
   ggplot(aes(x = short_term, y = estimate, 
              ymin = conf.low, ymax = conf.high)) +
   geom_pointrange(size=.5) +
