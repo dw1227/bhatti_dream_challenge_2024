@@ -75,7 +75,7 @@ results/Bootstrap_RMSE_Results.csv: code/run_r_script.sh \
 						  code/perform_bootstraps_submissions.R                             
 	code/run_r_script.sh code/perform_bootstraps_submissions.R
 	
-results/Bayes_factor_rmse_violin.pdf: code/run_r_script.sh \
+results/Figure_4.pdf: code/run_r_script.sh \
 	            data/submissions/Job-393694313420778661233189284.csv \
 	            code/run_r_script.sh\
 	            results/Bootstrap_RMSE_Results.csv \
@@ -133,4 +133,44 @@ results/plot_association_ega_acceleration_environmental_exposures.pdf: \
 			    code/association_ega_acceleration_envrionmental_exposures.R
 	code/run_r_script.sh code/association_ega_acceleration_envrionmental_exposures.R 
 
+results/FigureS5_cpc.pdf: \
+          data/processed/ano_all_predictions.csv\
+	        data/prb/sample_metadata.csv\
+	        code/run_r_script.sh\
+			    code/association_ega_acceleration_pregnancy_complications_team1.R
+	code/run_r_script.sh code/association_ega_acceleration_pregnancy_complications_cpc.R 
+
+
+
+results/FigureS6_rpc.pdf: \
+          data/processed/ano_all_predictions.csv\
+	        data/prb/sample_metadata.csv\
+	        code/run_r_script.sh\
+			    code/association_ega_acceleration_pregnancy_complications_team1.R
+	code/run_r_script.sh code/association_ega_acceleration_pregnancy_complications_rpc.R 
+
+results/FigureS7_team1.pdf: \
+          data/processed/ano_all_predictions.csv\
+	        data/prb/sample_metadata.csv\
+	        code/run_r_script.sh\
+			    code/association_ega_acceleration_pregnancy_complications_team1.R
+	code/run_r_script.sh code/association_ega_acceleration_pregnancy_complications_team1.R 
+
+results/FigureS8_team2.pdf: \
+          data/processed/ano_all_predictions.csv\
+	        data/prb/sample_metadata.csv\
+	        code/run_r_script.sh\
+			    code/association_ega_acceleration_pregnancy_complications_team2.R
+	code/run_r_script.sh code/association_ega_acceleration_pregnancy_complications_team2.R 
+
+
+
+results/results/TableS2_wsu_probes_bp_significant.csv: \
+          data/dream_challenge/Beta_raw_subchallenge1.csv\
+          data/probe_annotation/GSE198627_GEO_Methylation850k_PLATFORMv2.1.txt\
+          data/clocks/wsu_pl_clock_450k.Rdata\
+          data/gene_sets/c5.go.bp.v2024.1.Hs.entrez.gmt\
+	        code/run_r_script.sh\
+			    code/wsu_clock_ora_genomic.R
+	code/run_r_script.sh code/wsu_clock_ora_genomic.R
 

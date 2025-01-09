@@ -79,12 +79,12 @@ target_cpgs<- rownames(coefficients |> filter(s1!=0))[-1]
 
 annotation_data <- epic_annotation |> 
   dplyr::select(ID, Regulatory_Region,
-         Global_TSS_transcript_type,
-         Relation_to_CpG_Island) |> 
+                Global_TSS_transcript_type,
+                Relation_to_CpG_Island) |> 
   dplyr::filter(ID %in% all_cpgs) 
-  # drop_na(UCSC_RefGene_Group) |> 
-  # separate_rows(UCSC_RefGene_Group,sep = ";") |> 
-  # distinct()
+# drop_na(UCSC_RefGene_Group) |> 
+# separate_rows(UCSC_RefGene_Group,sep = ";") |> 
+# distinct()
 
 # Define target_ids and universe_ids (CpG probes)
 target_ids <- target_cpgs[target_cpgs%in% annotation_data$ID]     # Vector of target CpG probes
@@ -98,9 +98,9 @@ id_sets <- annotation_data |>
   deframe()
 
 non_coding_sets <- annotation_data |> 
-   drop_na(Global_TSS_transcript_type) |> 
-   separate_rows(Global_TSS_transcript_type,sep = ";") |> 
-   distinct() |> 
+  drop_na(Global_TSS_transcript_type) |> 
+  separate_rows(Global_TSS_transcript_type,sep = ";") |> 
+  distinct() |> 
   dplyr::filter(Global_TSS_transcript_type %in% c("eRNA","lncRNA","small-NC")) |> 
   group_by(Global_TSS_transcript_type) |> 
   summarize(probes = list(unique(ID))) |> 
@@ -117,7 +117,7 @@ cpg_island_sets <-annotation_data |>
 
 
 id_sets<- c(id_sets,non_coding_sets,cpg_island_sets)
-  
+
 # Extract region names for set_names
 set_names <- names(id_sets)
 
@@ -177,7 +177,7 @@ write_csv(results[results$q<0.05,1:5],file="results/wsu_probes_genomic_context_s
 # test |> 
 #   dplyr::filter(padj<0.1) |> 
 #   dplyr::select(ID,Description)
-  
+
 
 
 
@@ -185,25 +185,25 @@ write_csv(results[results$q<0.05,1:5],file="results/wsu_probes_genomic_context_s
 ## extract the list of genes associated with wsu cpgs 
 get_entrez_genes<- function(cpgs,epic_annotation)
 {
-annotation_data <- epic_annotation |>   
-  dplyr::filter(ID %in% cpgs) |> 
-  dplyr::select(Global_enhancer_targets_HGNC,
-         Global_TSS_associated_transcript_HGNC,
-         Global_GeneBody_HGNC) |> 
-  unite("genes_combined",c(Global_enhancer_targets_HGNC,
-        Global_TSS_associated_transcript_HGNC,
-        Global_GeneBody_HGNC),sep=";",na.rm=T,remove = F) |> 
-  separate_rows(genes_combined,sep=";") |> 
-  dplyr::filter(genes_combined!="unknown") |> 
-  distinct(genes_combined)
-
-entrez_ids<- na.omit(unique(unlist(AnnotationDbi::mapIds(org.Hs.eg.db,
-                    keys=annotation_data$genes_combined,
-                    column="ENTREZID",
-                    keytype="SYMBOL",
-                    multiVals="first") )))
-return(entrez_ids)
-
+  annotation_data <- epic_annotation |>   
+    dplyr::filter(ID %in% cpgs) |> 
+    dplyr::select(Global_enhancer_targets_HGNC,
+                  Global_TSS_associated_transcript_HGNC,
+                  Global_GeneBody_HGNC) |> 
+    unite("genes_combined",c(Global_enhancer_targets_HGNC,
+                             Global_TSS_associated_transcript_HGNC,
+                             Global_GeneBody_HGNC),sep=";",na.rm=T,remove = F) |> 
+    separate_rows(genes_combined,sep=";") |> 
+    dplyr::filter(genes_combined!="unknown") |> 
+    distinct(genes_combined)
+  
+  entrez_ids<- na.omit(unique(unlist(AnnotationDbi::mapIds(org.Hs.eg.db,
+                                                           keys=annotation_data$genes_combined,
+                                                           column="ENTREZID",
+                                                           keytype="SYMBOL",
+                                                           multiVals="first") )))
+  return(entrez_ids)
+  
 }
 
 
@@ -217,16 +217,16 @@ id_sets<-read.gmt("data/gene_sets/c5.go.bp.v2024.1.Hs.entrez.gmt") |>
 
 
 bp_results <- ora(target_ids= de,
-               universe_ids=all,
-               id_sets=id_sets,
-               set_names=names(id_sets))
+                  universe_ids=all,
+                  id_sets=id_sets,
+                  set_names=names(id_sets))
 
 bp_results<- bp_results |> 
   dplyr::filter(Size>100) |> 
   dplyr::filter(Size<=500) |> 
-  dplyr::filter(q<=0.05) |> 
+  dplyr::filter(q<=0.1) |> 
   dplyr::select(-Genes) |> 
   arrange(desc(OddsRatio))
-  
 
-write_csv(bp_results,file="results/wsu_probes_bp_significant.csv")
+
+write_csv(bp_results,file="results/TableS2_wsu_probes_bp_significant.csv")

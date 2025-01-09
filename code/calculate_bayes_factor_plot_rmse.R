@@ -21,31 +21,41 @@ library(Metrics)
 
 
 
+# 
+# df<- read_csv("data/submissions/Job-393694313420778661233189284.csv")
+# df<- df |> select(submitterid,Submitter) |> 
+#   filter(!duplicated(submitterid)) |> 
+#   mutate(user= str_extract(Submitter,pattern = "\\(.*\\).*"),
+#          user= str_replace_all(user, "[()]", ""),
+#          user=if_else(is.na(user),
+#                       str_replace(Submitter,pattern = "Team - ",""),
+#                       paste0("@",user)),
+#          Submitter=user)
+# 
+# # ---- Bayes Factor Calculation ----
+# res_df<- read_csv("results/Bootstrap_RMSE_Results.csv")
+# res_df<- res_df |> left_join(df,by="submitterid")
 
-df<- read_csv("data/submissions/Job-393694313420778661233189284.csv")
-df<- df |> select(submitterid,Submitter) |> 
-  filter(!duplicated(submitterid)) |> 
-  mutate(user= str_extract(Submitter,pattern = "\\(.*\\).*"),
-         user= str_replace_all(user, "[()]", ""),
-         user=if_else(is.na(user),
-                      str_replace(Submitter,pattern = "Team - ",""),
-                      paste0("@",user)),
-         Submitter=user)
-
-# ---- Bayes Factor Calculation ----
-res_df<- read_csv("results/Bootstrap_RMSE_Results.csv")
-res_df<- res_df |> left_join(df,by="submitterid")
+res_df<- read_csv("results/Bootstrap_RMSE_Results.csv") |> 
+  dplyr::filter(clock %in% c("ga_woc",#"wsu_450k","ga_automl_450k",
+                             "ga_3505704_9615595", "ga_3506332_9615596" ,
+                             "ga_3511256_9615595", "ga_3512486_9615595", 
+                             "ga_3449866_9615596" ,"ga_3320980_9615595" ,
+                             "ga_3453175_9615595" ))
 
 
 # Step 1: Calculate the median RMSE for each team
 team_rmse_median <- res_df %>%
-  group_by(submitterid,Submitter) %>%
+  group_by(clock) %>%
   summarize(median_rmse = median(rmse))
 
 # Step 2: Rank teams by their median RMSE (lower RMSE is better)
 team_rmse_median <- team_rmse_median %>%
   arrange(median_rmse) %>%
-  mutate(rank = row_number())
+  mutate(rank = row_number(),
+         label=paste("Team", rank-1))
+
+
 
 # Step 3: Initialize empty columns to store Bayes factors
 team_rmse_median$bayes_k_k1 <- NA
@@ -53,8 +63,8 @@ team_rmse_median$bayes_k_k1 <- NA
 # Step 4: Calculate Bayes factor for k vs k+1 for each team (except the last team)
 for (k in 1:(nrow(team_rmse_median) - 1)) {
   # Subset the RMSE results for team k and team k+1
-  rmse_team_k <- res_df %>% filter(submitterid == team_rmse_median$submitterid[k])
-  rmse_team_k1 <- res_df %>% filter(submitterid == team_rmse_median$submitterid[k + 1])
+  rmse_team_k <- res_df %>% filter(clock == team_rmse_median$clock[k])
+  rmse_team_k1 <- res_df %>% filter(clock == team_rmse_median$clock[k + 1])
   
   # Initialize counters for better and worse comparisons
   num_k_better <- 0
@@ -82,24 +92,28 @@ for (k in 1:(nrow(team_rmse_median) - 1)) {
   
   # Prepare the data for violin plot
   violin_data <- res_df %>%
-    inner_join(team_rmse_median, by = "Submitter") %>%
-    mutate(Submitter = factor(Submitter,
-                                levels = team_rmse_median$Submitter))
+    inner_join(team_rmse_median, by = "clock") %>%
+    mutate(Submitter = factor(clock,
+                                levels = team_rmse_median$clock))
   
   team_rmse_median<- team_rmse_median |> 
-    mutate(Submitter = factor(Submitter,
-                                levels = team_rmse_median$Submitter))
+    mutate(Submitter = factor(clock,
+                                levels = team_rmse_median$clock))
+  
+  
+  
   
   # Plot the violin plot
-  g_vp<- ggplot(violin_data, aes(x = Submitter, y = rmse,
-                                 fill=Submitter)) +
+  g_vp<- ggplot(violin_data, aes(x = label, 
+                                 y = rmse,
+                                 fill=label)) +
     geom_violin(trim = FALSE) +                          # Violin plot for RMSE distribution
     stat_summary(fun = median, geom = "point", size = 2) + # Display median RMSE as points
     theme_bw() +
     labs(title = "Violin Plot of RMSE across Bootstrap Resamples",
          x = "Team",
          y = "RMSE") +
-    geom_text(data = team_rmse_median, aes(x = Submitter, 
+    geom_text(data = team_rmse_median, aes(x = label, 
                                            y = 3.6, 
                                            label = round(bayes_k_k1, 2)),
               vjust = -0.5)   +
@@ -111,7 +125,7 @@ for (k in 1:(nrow(team_rmse_median) - 1)) {
           axis.title.x = element_blank(),
           legend.position = "none")
   
-  pdf("results/Bayes_factor_rmse_violin.pdf",width=10,height = 8)
+  pdf("results/Figure_4.pdf",width=10,height = 8)
   print(g_vp)
   dev.off()
   
