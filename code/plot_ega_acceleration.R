@@ -13,7 +13,9 @@
 library(tidyverse)
 library(here)
 library(ggpubr)
-
+library(gridExtra)
+library(patchwork)
+library(ggpubr)
 ano<- read_csv(here("data/processed/ano_all_predictions.csv"))
 
 
@@ -83,7 +85,7 @@ analyze_eGA_acceleration <- function(data, ega_column, chronological_column,
   
   # Plotting
   max_y <- max(data$eGA_acceleration, na.rm = TRUE)
-  p_value_annotation <- mutate(test_results, y.position = max_y * 1.1)
+  p_value_annotation <- mutate(test_results, y.position = 5.5)#max_y * 1.1)
 
   
   box_plot <- ggboxplot(data, x = "Group", y = "eGA_acceleration",
@@ -93,20 +95,22 @@ analyze_eGA_acceleration <- function(data, ega_column, chronological_column,
                         xlab = "Group") +
     labs(title = title,x="") +
     theme_pubr() +
-    theme(legend.position = "none") # Remove legend for cleaner plot
+    ylim(-4,6)+
+    theme(legend.position = "none",
+          plot.title = element_text(hjust=0.5)) # Remove legend for cleaner plot
   
   # Adding p-value annotations manually
   box_plot<- box_plot +
     geom_text(data = test_results, 
-              aes(x = Group, y = max_y * 1.1,
+              aes(x = Group, y=5.3, #y = max_y * 1.1,
                   label = sprintf("%.1f(p= %.3f)",mean_eGA_acceleration,
                                   p_value)),hjust = 0.5, vjust = 0) +
     geom_hline(yintercept = 0,linetype=2,alpha=0.2)  +   
-    annotate("text",x = 1, y = max_y * 1.2,
+    annotate("text",x = 1, y=5.9,# = max_y * 1.2,
                   label = "Mean eGA acceleration",size=5
              ,hjust=0.23)+
-    scale_color_manual(values= c("red","green","blue",
-                             "purple",  "orange","black"),
+    scale_color_manual(values= c("#D55E00","#009E73","#0072B2",
+                                         "#CC79A7",  "#E69F00","#000000"),
                    breaks=c("PTL","PPROM","Preterm PE", 
                            "Term PE","Term SGA","Control"))
 
@@ -144,13 +148,20 @@ top_team_results_2 <- analyze_eGA_acceleration(ano, top_teams[2],"Del_GA_Calc",
                                                title="Team 2")
 
 top_team_results_3 <- analyze_eGA_acceleration(ano, top_teams[3],"Del_GA_Calc",
-                                               title="Top Performer #3")
+                                               title="Team 3")
 
 woc_results <- analyze_eGA_acceleration(ano, "ga_woc","Del_GA_Calc",
                                         title="Wisdom of Crowds")
 
 wsu_450_results <- analyze_eGA_acceleration(ano, "wsu_450k","Del_GA_Calc",
-                                        title="Wayne state placental clock")
+                                        title="Post Challenge Placenta Clock")
+
+
+
+
+autogluon_results <- analyze_eGA_acceleration(ano, "ga_automl_450k","Del_GA_Calc",
+                                            title="Autogluon")
+
 
 
 pdf("results/eGA_acceleration_existing_clocks.pdf",width = 8)
@@ -167,4 +178,50 @@ wsu_450_results
 dev.off()
 
 
+
+pdf("results/Figure7.pdf",height=6, width = 14)
+fig7<- ggarrange(cpc_results+
+                   theme(legend.position = "none",axis.title = element_blank()), 
+          wsu_450_results+
+            theme(legend.position = "none",axis.title = element_blank()), 
+          labels = c("A", "B"),  
+          ncol=2, nrow=1)
+
+# Adding a common title using annotate_figure
+fig7 <- annotate_figure(fig7,
+                        top = text_grob("Figure 7", 
+                                        size = 14, face = "bold",
+                                        hjust=0,x=0))
+fig7
+
+dev.off()
+
+
+
+
+pdf("results/FigureS3.pdf",height=6, width = 14)
+
+figs3<- ggarrange(rpc_results+theme(legend.position = "none",axis.title = element_blank()) , 
+          rrpc_results+theme(legend.position = "none",axis.title = element_blank()), labels = c("A", "B"),  
+          ncol=2, nrow=1)
+
+figs3
+
+dev.off()
+
+
+
+
+pdf("results/FigureS4.pdf",height=13, width = 14)
+
+figs4<- ggarrange(top_team_results_1+theme(legend.position = "none",axis.title = element_blank()) , 
+                  top_team_results_2+theme(legend.position = "none",axis.title = element_blank()),
+                  top_team_results_3+theme(legend.position = "none",axis.title = element_blank()),
+                  
+                  labels = c("A", "B", "C"),  
+                  ncol=2, nrow=2)
+
+figs4
+
+dev.off()
 

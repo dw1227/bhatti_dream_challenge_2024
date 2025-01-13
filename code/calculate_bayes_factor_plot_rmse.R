@@ -18,8 +18,10 @@ library(lubridate)
 library(rvest)
 library(stringr)
 library(Metrics)
-
-
+library(cowplot)
+library(gridExtra)
+library(patchwork)
+library(ggpubr)
 
 # 
 # df<- read_csv("data/submissions/Job-393694313420778661233189284.csv")
@@ -53,7 +55,8 @@ team_rmse_median <- res_df %>%
 team_rmse_median <- team_rmse_median %>%
   arrange(median_rmse) %>%
   mutate(rank = row_number(),
-         label=paste("Team", rank-1))
+         label=paste("Team", rank-1)) |> 
+  mutate(label=if_else(label=="Team 0", "Wisdom\nof\ncrowds",label))
 
 
 
@@ -93,39 +96,51 @@ for (k in 1:(nrow(team_rmse_median) - 1)) {
   # Prepare the data for violin plot
   violin_data <- res_df %>%
     inner_join(team_rmse_median, by = "clock") %>%
-    mutate(Submitter = factor(clock,
-                                levels = team_rmse_median$clock))
+    mutate(label = factor(label,
+                                levels = team_rmse_median$label))
   
   team_rmse_median<- team_rmse_median |> 
-    mutate(Submitter = factor(clock,
-                                levels = team_rmse_median$clock))
+    mutate(label = factor(label,
+                                levels = team_rmse_median$label))
   
   
   
   
   # Plot the violin plot
   g_vp<- ggplot(violin_data, aes(x = label, 
-                                 y = rmse,
-                                 fill=label)) +
-    geom_violin(trim = FALSE) +                          # Violin plot for RMSE distribution
-    stat_summary(fun = median, geom = "point", size = 2) + # Display median RMSE as points
-    theme_bw() +
-    labs(title = "Violin Plot of RMSE across Bootstrap Resamples",
+                                 y = rmse,fill=label)) +
+    # Remove fill from here
+    geom_violin(trim = FALSE) + # Set fill to a gray tone and outline color to black
+    stat_summary(fun = median, geom = "point", size = 2, color = "black") + # Median points in black
+    theme_minimal() + 
+    labs(
          x = "Team",
          y = "RMSE") +
     geom_text(data = team_rmse_median, aes(x = label, 
-                                           y = 3.6, 
+                                           y = 3.4, 
                                            label = round(bayes_k_k1, 2)),
               vjust = -0.5)   +
+    theme_cowplot()+
+    
     # Add the label for Bayes factor
-    annotate("text", x = 1, y = 3.8, label = "Bayes factor (k vs k+1)", 
-             vjust = 0, hjust = 0, size = 4, fontface = "bold") +
-    theme(axis.text.x = element_text(angle = 0, hjust = 0.5,
+    annotate("text", x = 3.5, y = 3.5, label = "Bayes factor (k vs k+1)", 
+             vjust = 0, hjust = 0, size = 6) +
+    theme(axis.text.x = element_text(angle = 0, hjust = 0.5,vjust=0.5,
                                      size = 12,face = "bold"),
           axis.title.x = element_blank(),
-          legend.position = "none")
+          legend.position = "none",
+          plot.title = element_text(size=14,face = "bold"))
   
-  pdf("results/Figure_4.pdf",width=10,height = 8)
-  print(g_vp)
+  pdf("results/Figure4.pdf",width=10,height = 8)
+  
+  fig4 <- annotate_figure(g_vp,
+                          top = text_grob("Figure 4", 
+                                          size = 14, face = "bold",
+                                          hjust=0,x=0))
+  
+  
+  
+  print(fig4)
+  
   dev.off()
   

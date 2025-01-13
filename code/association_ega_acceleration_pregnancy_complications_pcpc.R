@@ -77,7 +77,7 @@ df$Percentile_cat<- cut(df$Percentile,100*c(0,0.2,0.4,0.6,0.8,1))
 # df |> 
 #   filter(fetal_sex==1) |> 
   
-boxplot(y~Percentile_cat,data=df[df$fetal_sex=="0",])
+# boxplot(y~Percentile_cat,data=df[df$fetal_sex=="0",])
   
 
 selected_model <- lm( Percentile~y*fetal_sex+Age + smoking   
@@ -95,7 +95,7 @@ summary(selected_model)
 #tab_model(selected_model, transform = NULL, auto.label = FALSE)
 
 ### Make a Plot
-cols <- c("0" = "red", "1" = "blue")
+cols <- c("1" = "#D55E00", "0" = "#0072B2")
 g_bwp<- df |> 
   ggplot(aes(x=y,y=Percentile,color=fetal_sex))+
   geom_point()+
@@ -104,7 +104,14 @@ g_bwp<- df |>
   labs(title = "Term placentas (n=171, GA≥ 37 )",
        x="eGA Acceleration",
        y="Birthweight Percentile")+
-  theme_bw()
+  theme_cowplot()+
+  theme(legend.position = c(0.85, 0.85),  # Center the legend inside the plot
+        legend.text = element_text(size = 12), 
+        legend.key.size = unit(1, "lines"),
+        legend.justification = c("center", "center"),  # Justify legend center to the coordinate
+        legend.background = element_rect(fill = "white", colour = "white"))
+
+
 
 
 
@@ -182,7 +189,7 @@ selected_model <- lm( Percentile~y+fetal_sex_r+Age + smoking
 #tab_model(selected_model, transform = NULL, auto.label = F)
 
 
-cols <- c("0" = "red", "1" = "blue")
+cols <- c("1" = "#D55E00", "0" = "#0072B2")
 pt_bwp<- df |> 
   ggplot(aes(x=y,y=Percentile,color=fetal_sex))+
   geom_point()+
@@ -191,7 +198,12 @@ pt_bwp<- df |>
   labs(title = "Preterm placentas (n=213, GA<37)",
        x="eGA Acceleration ",
        y="Birthweight Percentile")+
-  theme_bw()
+  theme_cowplot()+
+  theme(legend.position = c(0.85, 0.85),  # Center the legend inside the plot
+        legend.text = element_text(size = 12), 
+        legend.key.size = unit(1, "lines"),
+        legend.justification = c("center", "center"),  # Justify legend center to the coordinate
+        legend.background = element_rect(fill = "white", colour = "white"))
 
 
 ## PE
@@ -260,12 +272,16 @@ summary(selected_model)
 
 
 pdf("results/Figure8.pdf",height=8,width=10)
-ggarrange(g_bwp,pt_bwp, labels = c("A", "B"),  
-          ncol=2, nrow=1,common.legend = TRUE, legend="bottom")
+fig8<- ggarrange(g_bwp+theme(legend.position = "none"),pt_bwp, labels = c("A", "B"),  
+          ncol=2, nrow=1)
+# Adding a common title using annotate_figure
+fig8 <- annotate_figure(fig8,
+                        top = text_grob("Figure 8", 
+                                        size = 14, face = "bold",
+                                        hjust=0,x=0))
+fig8
 
 dev.off()
-
-
 
 
 

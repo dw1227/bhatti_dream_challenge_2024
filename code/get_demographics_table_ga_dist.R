@@ -19,7 +19,7 @@ library(cowplot)
 ano<- read_csv(here("data/prb/anoall.csv"))
 
 metadata<- read_csv(here("data/prb/sample_metadata.csv")) |> 
-  select("EN_Main_Index","EN_Smoking","EN_smokingtxt","EN_Drugs","EN_Drug_txt",
+  dplyr::select("EN_Main_Index","EN_Smoking","EN_smokingtxt","EN_Drugs","EN_Drug_txt",
          "EN_ML_Race")
 
 
@@ -35,7 +35,7 @@ pdata<- ano |>
          height=HGTinch,
          race=EN_ML_Race,
          Nulliparous=factor(if_else(Parity==0,1,0,NA),levels = c("0","1")) ) |> 
-  select(smoking,drugs,fetal_sex,maternal_age,weight,height,BMI,Del_GA_Calc,
+  dplyr::select(smoking,drugs,fetal_sex,maternal_age,weight,height,BMI,Del_GA_Calc,
          Group=Group2,Baby_Weight,Percentile,race,Nulliparous,smoking,drugs)
   
 
@@ -54,7 +54,7 @@ for ( i in 1:length(cv))
                                "termPE","termSGA"))
   test=oneway.test(y~x,var.equal = F)
   median= round(tapply(y,x,median,na.rm=T),1)
-  ranges= unlist(lapply(tapply(y,x,function(x){round(quantile(x,c(0,1),na.rm=T),1)}),
+  ranges= unlist(lapply(tapply(y,x,function(x){round(quantile(x,c(0.25,0.75),na.rm=T),1)}),
                         function(x){paste0("(",paste(x,collapse="-"),")")}))
   med=paste0(median,ranges)
   N_obs=sum(!is.na(y))
@@ -107,11 +107,11 @@ rownames(res)=res$Variable
 #           "Csec","birwei","apgar5","cervdil"),]
 
 
-res=res[c("maternal_age","AAx","Nulliparous","smoking","drugs","BMI","Del_GA_Calc",
-          "Baby_Weight","fetal_sex"),]
+res=res[c("maternal_age","AAx","Nulliparous","smohiking","drugs","BMI","Del_GA_Calc",
+          "Baby_Weight","Percentile","fetal_sex"),]
 
 res$Variable<- c("Age","African American","Nulliparous","Smoking","Drugs",
-                 "BMI","Gestational age at delivery","Birthweight","Fetal sex")
+                 "BMI","Gestational age at delivery","Birth weight","Birth weight percentile","Fetal sex")
 
 
 write.csv(res,"results/demographics_test.csv")
@@ -147,3 +147,31 @@ ano |>
 
 dev.off()
 
+
+
+pdf("results/Test_public_datasets_GA_distribution.pdf",width=9)
+ano |>  
+  filter(split=="Test data") |> 
+  ggplot(aes(GA)) +
+  geom_histogram(color = "#000000", fill = "#0099F8") +
+  theme_classic()+
+  labs(x="Gestational age (weeks)",
+       y="")+
+  theme(axis.text =element_text(size=15),
+        axis.title.x =element_text(size=20))
+
+
+ano |>  
+  filter(split!="Test data") |> 
+  ggplot(aes(GA)) +
+  geom_histogram(color = "#000000", fill = "#0099F8") +
+  theme_classic()+
+  labs(x="Gestational age (weeks)",
+       y="")+
+  theme(axis.text =element_text(size=15),
+        axis.title.x =element_text(size=20))
+
+
+
+
+dev.off()

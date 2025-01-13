@@ -78,7 +78,8 @@ selected_model <- lm( Percentile~y*fetal_sex+Age + smoking
 summary(selected_model)
 
 ### Make a Plot
-cols <- c("0" = "red", "1" = "blue")
+cols <- c("1" = "#D55E00", "0" = "#0072B2")
+
 g_bwp<- df |> 
   ggplot(aes(x=y,y=Percentile,color=fetal_sex))+
   geom_point()+
@@ -147,7 +148,8 @@ summary(selected_model)
 ##tab_model(selected_model, transform = NULL, auto.label = F)
 
 
-cols <- c("0" = "red", "1" = "blue")
+cols <- c("1" = "#D55E00", "0" = "#0072B2")
+
 pt_bwp<- df |> 
   ggplot(aes(x=y,y=Percentile,color=fetal_sex))+
   geom_point()+

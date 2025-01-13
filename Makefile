@@ -30,11 +30,11 @@ data/processed/autogluon_predictions_850k_2.csv: \
 	
 	
 	        
-data/clocks/wsu_pl_clock_450k.Rdata: \
-			data/dream_challenge/beta_public_normalized_sc1.Rdata \
-			code/wsu_placenta_clock_450k.R \
-			code/submit_wsu_placenta_clock_training.sh
-	sbatch code/submit_wsu_placenta_clock_training.sh
+# data/clocks/wsu_pl_clock_450k.Rdata: \
+#			data/dream_challenge/beta_public_normalized_sc1.Rdata \
+#			code/wsu_placenta_clock_450k.R \
+#			code/submit_wsu_placenta_clock_training.sh
+#	sbatch code/submit_wsu_placenta_clock_training.sh
 	
 	
 
